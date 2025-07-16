@@ -6,14 +6,20 @@ const connectDB = require("./config/dbnonnect");
 const corsOptions = require("./config/corsOptions");
 const multer = require("multer");
 const path=require('path')
+const morgan=require('morgan')
 const app = express();
 const port = process.env.PORT || 3000;
 //-------------
 
 // require routes
 const authRoutes = require("./routes/authRoutes");
+const categoryRoures=require('./routes/category');
 
 //middleware
+if(process.env.NODE_ENV==='development'){
+  app.use(morgan('dev'));
+  console.log(process.env.NODE_ENV) 
+}
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
