@@ -18,7 +18,6 @@ const categoryRoures=require('./routes/category');
 //middleware
 if(process.env.NODE_ENV==='development'){
   app.use(morgan('dev'));
-  console.log(process.env.NODE_ENV) 
 }
 app.use(cors(corsOptions));
 app.use(cookieParser());
@@ -27,8 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // routs
-app.use("/auth", authRoutes); 
-
+app.use("/api/v1/auth", authRoutes); 
+app.use('/api/v1/category',categoryRoures)
   
 //----------
 connectDB()
