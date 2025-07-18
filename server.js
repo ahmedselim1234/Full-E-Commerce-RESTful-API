@@ -2,20 +2,22 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
+// const multer = require("multer");
+// const path = require("path");
+const morgan = require("morgan");
 const connectDB = require("./config/dbnonnect");
 const corsOptions = require("./config/corsOptions");
-const multer = require("multer");
-const path = require("path");
-const morgan = require("morgan");
+const {ApiError,HandleError} = require("./middleware/errorHandler");
 //ApiError is a class to create error
-const {ApiError,HandleError} = require("./middleware/errorHandler.js");
 const app = express();
 const port = process.env.PORT || 3000;
 //-------------
 
 // require routes
 const authRoutes = require("./routes/authRoutes");
-const categoryRoures = require("./routes/category");
+const categoryRoutes = require("./routes/category");
+const subCategoryRoutes = require("./routes/subCategory");
+const brandsRoutes = require("./routes/brandsRoutes");
 
 
 //middleware
@@ -29,10 +31,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // routs
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/category", categoryRoures);
+app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/subcategories", subCategoryRoutes);
+app.use("/api/v1/brands", brandsRoutes);
 
 app.use((req, res, next) => {
-  
    next(new ApiError("this page is not exist", 404));
 });
 
@@ -40,7 +43,7 @@ app.use((req, res, next) => {
 app.use(HandleError);
 
 //----------
-
+ 
  
 
 //Handle errors that cuase not  from express

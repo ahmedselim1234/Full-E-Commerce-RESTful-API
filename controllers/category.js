@@ -1,7 +1,7 @@
 const slugify = require("slugify");
-const Category = require("../models/category");
 const asyncHandler = require("express-async-handler");
-const { ApiError } = require("../middleware/errorHandler.js");
+const Category = require("../models/category");
+const { ApiError } = require("../middleware/errorHandler");
 
 exports.createCategory = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
@@ -32,7 +32,7 @@ exports.getSpeceficCategory = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: category });
 });
 
-exports.updateCategory = asyncHandler(async (req, res,next) => {
+exports.updateCategory = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.body;
 
