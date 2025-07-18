@@ -7,6 +7,7 @@ const corsOptions = require("./config/corsOptions");
 const multer = require("multer");
 const path = require("path");
 const morgan = require("morgan");
+//ApiError is a class to create error
 const {ApiError,HandleError} = require("./middleware/errorHandler.js");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -54,3 +55,4 @@ connectDB()
       console.log("server is running");
     });
   });
+

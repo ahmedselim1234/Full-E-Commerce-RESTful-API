@@ -19,7 +19,7 @@ const HandleError = (err, req, res, next) => {
 };
 
 const HandleErrorInDev = (err, res) => {
-  return res.status(err.statusCode).json({
+  return res.status(err.statusCode).json({ 
     status: err.status,
     error: err,
     message: err.message,
