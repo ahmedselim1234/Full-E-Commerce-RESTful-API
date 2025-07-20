@@ -2,6 +2,7 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const subCategory = require("../models/subCategory");
 const { ApiError } = require("../middleware/errorHandler");
+const { ApiFeatures } = require("../util/apiFeatures");
 
 // i will use it as a middleware to solve set the validation in createSubCategory before set categoryId as a body
 exports.setCategoryIdBeforeValidation = (req, res, next) => {
@@ -33,29 +34,24 @@ exports.getSubCategory = asyncHandler(async (req, res, next) => {
 });
 
 exports.getSubCategories = asyncHandler(async (req, res, next) => {
-  const page = req.query.page || 1;
-  const limit = 2;
-  const skip = limit * (page - 1);
-  const filter = req.params.categoryId
-    ? { category: req.params.categoryId }
-    : {};
-  console.log(req.params.categoryId);
+  const CountOfDocuments = await subCategory.countDocuments();
 
-  const thetheSubCategories = await subCategory
-    .find(filter)
-    .limit(limit)
-    .skip(skip);
-  //   .populate({
-  //     path: "category",
-  //     select: "name -_id",
-  //   });
-  res
-    .status(200)
-    .json({
-      page: page,
-      length: thetheSubCategories.length,
-      SubCategories: thetheSubCategories,
-    });
+  const apiFeatures = new ApiFeatures(subCategory.find(), req.query)
+    .filter()
+    .search()
+    .sort()
+    .limitFields()
+    .paginate(CountOfDocuments);
+
+  const { mongoQuery, paginatetionResult } = apiFeatures;
+
+  const scategories = await mongoQuery;
+  
+  res.status(200).json({
+    length: scategories.length,
+    SubCategories: scategories,
+    paginatetionResult: paginatetionResult,
+  });
 });
 
 exports.updateSubCategory = asyncHandler(async (req, res, next) => {

@@ -5,6 +5,7 @@ const User = require("../models/user");
 const sendEmail = require("../util/sendEmail");
 
 exports.signup = async (req, res, next) => {
+
   const { first_name, email, password } = req.body;
   if (!first_name || !email || !password)
     return res.json({ m: "fill all fields" });

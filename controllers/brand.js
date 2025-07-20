@@ -1,7 +1,8 @@
 const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
-const Brand = require("../models/brandModel"); 
+const Brand = require("../models/brandModel");
 const { ApiError } = require("../middleware/errorHandler");
+const { ApiFeatures } = require("../util/apiFeatures");
 
 exports.createBrand = asyncHandler(async (req, res, next) => {
   const { name } = req.body;
@@ -14,11 +15,20 @@ exports.createBrand = asyncHandler(async (req, res, next) => {
 });
 
 exports.getBrands = asyncHandler(async (req, res, next) => {
-  const page = req.query.page * 1 || 1;
-  const limit = 3;
-  const skip = limit * (page - 1);
-  const brands= await Brand.find().skip(skip).limit(limit);
-  res.status(200).json({ result: brands.length, data: brands });
+  const CountOfDocuments = await Brand.countDocuments();
+
+  const apiFeatures = new ApiFeatures(Brand.find(), req.query)
+    .filter()
+    .search()
+    .sort()
+    .limitFields()
+    .paginate(CountOfDocuments);
+
+  const { mongoQuery, paginatetionResult } = apiFeatures;
+
+  const brands = await mongoQuery;
+
+  res.status(200).json({ result: brands.length,paginatetionResult:paginatetionResult, data: brands });
 });
 
 exports.getSpeceficBrand = asyncHandler(async (req, res, next) => {
@@ -53,5 +63,5 @@ exports.deleteBrand = asyncHandler(async (req, res, next) => {
     return next(new ApiError("this Brand is not exist", 404));
   }
 
-  res.status(200).json({ deleted: brand});
+  res.status(200).json({ deleted: brand });
 });

@@ -14,6 +14,9 @@
     "class-methods-use-this": "off",
     "no-undef": "error",
     "prefer-destructuring": ["error", { "object": true, "array": false }],
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|val" }]
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "req|res|next|val" }],
+    "default-case": "off",
+    " node/no-unsupported-features/es-syntax":"off",
+    "eslint-disable-next-line camelcase":"off"
   }
 }
