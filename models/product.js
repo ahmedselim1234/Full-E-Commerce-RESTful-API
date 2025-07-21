@@ -18,8 +18,8 @@ const productSchema = new mongoose.Schema(
     description: {
       type: String,
       required: [true, "description is required"],
-     maxlength: [2000, "description to long"],
-      trim:true
+      maxlength: [2000, "description to long"],
+      trim: true,
     },
     quantity: {
       type: Number,
@@ -51,11 +51,13 @@ const productSchema = new mongoose.Schema(
       ref: "catgory",
       required: [true, "catgory is required"],
     },
-    subcategory: [{
-      type: mongoose.Schema.ObjectId,
-      ref: "subCategory",
-      //   required: [true, "subCategory is required"],
-    }],
+    subcategory: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "subCategory",
+        //   required: [true, "subCategory is required"],
+      },
+    ],
     brand: {
       type: mongoose.Schema.ObjectId,
       ref: "brand",
@@ -65,14 +67,22 @@ const productSchema = new mongoose.Schema(
       type: Number,
       min: [1, "Rating must more than or equel 1"],
       max: [5, "Rating must less than or equel 5"],
-    }, 
+    },
 
     ratingsQuantity: {
       type: Number,
-      default:0
+      default: 0,
     },
   },
   { timestamps: true }
 );
+
+productSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "category",
+    select: "name",
+  });
+  next();
+});
 
 module.exports = mongoose.model("product", productSchema);

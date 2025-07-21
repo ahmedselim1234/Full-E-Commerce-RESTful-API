@@ -6,7 +6,9 @@ const sendEmail = require("../util/sendEmail");
 
 exports.signup = async (req, res, next) => {
 
+  // eslint-disable-next-line camelcase
   const { first_name, email, password } = req.body;
+  // eslint-disable-next-line camelcase
   if (!first_name || !email || !password)
     return res.json({ m: "fill all fields" });
 
@@ -17,6 +19,7 @@ exports.signup = async (req, res, next) => {
     const hashedPass = await bcrypt.hash(password, 10);
 
     const createUser = await User.create({
+      // eslint-disable-next-line camelcase
       first_name,
       email,
       password: hashedPass,
