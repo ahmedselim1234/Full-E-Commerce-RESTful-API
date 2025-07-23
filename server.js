@@ -2,13 +2,12 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-// const multer = require("multer");
-// const path = require("path");
+const path = require("path");
 const morgan = require("morgan");
 const connectDB = require("./config/dbnonnect");
 const corsOptions = require("./config/corsOptions");
 const {ApiError,HandleError} = require("./middleware/errorHandler");
-//ApiError is a class to create error
+
 const app = express();
 const port = process.env.PORT || 3000;
 //-------------
@@ -29,6 +28,7 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname,'uploads')));
 
 // routs
 app.use("/api/v1/auth", authRoutes);

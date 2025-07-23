@@ -27,7 +27,7 @@ exports.updateDocument = (Model) =>
       new: true,
     });
     if (!model) {
-      return next(new ApiError("this product is not exist", 404));
+      return next(new ApiError("this document is not exist", 404));
     }
     res.status(200).json({ data: model });
   });
@@ -38,8 +38,8 @@ exports.createDocument = (Model) =>
       req.body.slug = slugify(req.body.title);
     } else if (req.body.name) {
       req.body.slug = slugify(req.body.name);
+      console.log(req.body.name)
     }
-
     const newModel = await Model.create(req.body);
 
     res.status(201).json({ newModel });

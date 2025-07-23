@@ -1,22 +1,37 @@
 const mongoose = require("mongoose");
 
-const brandSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:[true,'name is required'],
-        unique:[true,'this category is already exist'],
-        minlength:[3,'name to short'],
-        maxlength:[32,'too long '],
-        trim:true
+const brandSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "name is required!"],
+      unique: [true, "this category is already exist"],
+      minlength: [3, "name to short"],
+      maxlength: [32, "too long "],
+      trim: true,
     },
-    slug:{
-        type:String,
-        lowercase:true
+    slug: {
+      type: String,
+      lowercase: true,
     },
-    image:{
-        type:String
-    }
+    image: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
-},{timestamps:true})
+const setImageUrl=(doc)=>{
+       if(doc.image){
+        const imageUrl=`${process.env.BASE_URL}/brand/${doc.image}`;
+        doc.image=imageUrl;
+    }
+}
+brandSchema.post("init", (doc) =>{
+   setImageUrl(doc)
+});
+brandSchema.post("save", (doc) =>{
+    setImageUrl(doc)
+});
 
 module.exports = mongoose.model("brand", brandSchema);

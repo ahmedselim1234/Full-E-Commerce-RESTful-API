@@ -9,11 +9,11 @@ exports.getCategoryValidator = [
 exports.createCategoryValidator = [
   check("name")
     .notEmpty()
-    .withMessage("name required")
+    .withMessage("name required!")
     .isLength({ min: 3 })
-    .withMessage("so short")
+    .withMessage("too short")
     .isLength({ max: 32 })
-    .withMessage("to long"),
+    .withMessage("too long"),
   validatorMiddleware,
 ];
 exports.updateCategoryValidator = [
