@@ -2,6 +2,8 @@ const express = require("express");
 
 // const authController = require("../controllers/auth");
 const brandController = require("../controllers/brand");
+const requireAuth = require("../middleware/isAuth");
+const roles = require("../middleware/role");
 
 const {
   getCategoryValidator,
@@ -15,6 +17,8 @@ const router = express.Router();
 router
   .route("/")
   .post(
+    requireAuth,
+    roles.allowedTo("admin", "manager"),
     brandController.uploadBrandImage,
     brandController.resizeImage,
     createCategoryValidator,
@@ -26,11 +30,18 @@ router
   .route("/:id")
   .get(getCategoryValidator, brandController.getSpeceficBrand)
   .put(
+    requireAuth,
+    roles.allowedTo("admin", "manager"),
     brandController.uploadBrandImage,
     brandController.resizeImage,
     updateCategoryValidator,
     brandController.updateBrand
   )
-  .delete(deleteCategoryValidator, brandController.deleteBrand);
+  .delete(
+    requireAuth,
+    roles.allowedTo("admin"),
+    deleteCategoryValidator,
+    brandController.deleteBrand
+  );
 
 module.exports = router;

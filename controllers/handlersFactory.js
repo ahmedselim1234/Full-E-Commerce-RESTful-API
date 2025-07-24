@@ -8,10 +8,11 @@ exports.deleteFactoey = (Model) =>
     const { id } = req.params;
     const model = await Model.findByIdAndDelete(id);
     if (!model) {
-      return next(new ApiError("this product is not exist", 404));
+      return next(new ApiError("this document is not exist", 404));
     }
     res.status(204).json({ m: "deleted" });
   });
+
 
 exports.updateDocument = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -32,6 +33,7 @@ exports.updateDocument = (Model) =>
     res.status(200).json({ data: model });
   });
 
+
 exports.createDocument = (Model) =>
   asyncHandler(async (req, res, next) => {
     if (req.body.title) {
@@ -40,10 +42,11 @@ exports.createDocument = (Model) =>
       req.body.slug = slugify(req.body.name);
       console.log(req.body.name)
     }
-    const newModel = await Model.create(req.body);
+    const newModel = await Model.create(req.body); 
 
     res.status(201).json({ newModel });
   });
+
 
 exports.getSpeceficDocument = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -51,7 +54,7 @@ exports.getSpeceficDocument = (Model) =>
 
     const model = await Model.findById(id);
     if (!model) {
-      return next(new ApiError("this product is not exist", 404));
+      return next(new ApiError("this gocument is not exist", 404));
     }
     res.status(200).json({ data: model });
   });
@@ -78,4 +81,5 @@ exports.getALLDocument = (Model,ModelName) => asyncHandler(async (req, res, next
       data: Documents ,
     });
 });
+
 

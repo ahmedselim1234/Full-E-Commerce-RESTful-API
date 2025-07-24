@@ -1,51 +1,33 @@
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const slugify = require("slugify");
+// eslint-disable-next-line import/no-extraneous-dependencies, no-unused-vars
+const { v4: uuidv4 } = require("uuid");
+// eslint-disable-next-line import/no-extraneous-dependencies, no-unused-vars
+const sharp = require("sharp");
+// const asyncHandler = require("express-async-handler");
 const sendEmail = require("../util/sendEmail");
+const User = require("../models/user"); 
+const generateToken = require("./generateToken");
 
 exports.signup = async (req, res, next) => {
-
   // eslint-disable-next-line camelcase
   const { first_name, email, password } = req.body;
   // eslint-disable-next-line camelcase
   if (!first_name || !email || !password)
     return res.json({ m: "fill all fields" });
 
+  req.body.slug = slugify(req.body.first_name);
+  console.log(req.body.slug);
+
   try {
     const user = await User.findOne({ email: email });
     if (user) return res.json({ m: "this email is already exist" });
+    const createUser = await User.create(req.body);
 
-    const hashedPass = await bcrypt.hash(password, 10);
-
-    const createUser = await User.create({
-      // eslint-disable-next-line camelcase
-      first_name,
-      email,
-      password: hashedPass,
-    });
-
-    const accessToken = jwt.sign(
-      {
-        userInfo: {
-          id: createUser._id,
-          role: createUser.role,
-        },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "2m" }
-    );
-
-    const refreshToken = jwt.sign(
-      {
-        userInfo: {
-          id: createUser._id,
-          role: createUser.role,
-        },
-      },
-      process.env.REFREESH_TOKEN_SECRET,
-      { expiresIn: "7d" }
-    );
+    const accessToken = generateToken.accessToken(createUser);
+    const refreshToken = generateToken.refreshToken(createUser);
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -61,7 +43,7 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.json({ m: "fill all fields" });
+  if (!email || !password) return res.json({ message: "fill all fields" });
 
   try {
     const user = await User.findOne({ email: email });
@@ -70,26 +52,8 @@ exports.login = async (req, res, next) => {
     const comparePassword = await bcrypt.compare(password, user.password);
     if (!comparePassword) return res.json({ m: "enter a valid password " });
 
-    const accessToken = jwt.sign(
-      {
-        userInfo: {
-          id: user._id,
-          role: user.role,
-        },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "2m" }
-    );
-    const refreshToken = jwt.sign(
-      {
-        userInfo: {
-          id: user._id,
-          role: user.role,
-        },
-      },
-      process.env.REFREESH_TOKEN_SECRET,
-      { expiresIn: "7d" }
-    );
+    const accessToken = generateToken.accessToken(user);
+    const refreshToken = generateToken.refreshToken(user);
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -102,6 +66,7 @@ exports.login = async (req, res, next) => {
     console.log(err);
   }
 };
+
 
 exports.refresh = (req, res, next) => {
   const token = req.cookies.jwt;
@@ -116,16 +81,8 @@ exports.refresh = (req, res, next) => {
 
     if (!user) return res.status(401).json({ message: "unAuth" });
 
-    const accessToken = jwt.sign(
-      {
-        userInfo: {
-          id: user._id,
-          role: user.role,
-        },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "2m" }
-    );
+    const accessToken = generateToken.accessToken(user);
+
     res.json({ accessToken });
   });
 };
@@ -169,7 +126,7 @@ exports.forgetPassword = async (req, res, next) => {
       res.json({ m: "error when sending email" });
     }
 
-    res.json({ m: "d" });
+    res.json({ message: "the code is sent" });
   } catch (err) {
     console.log(err);
   }
@@ -192,7 +149,7 @@ exports.verifyResetCode = async (req, res, next) => {
     console.log(user);
 
     await user.save();
-    return res.json({ m: "success" });
+    return res.json({ message: "success" });
   } catch (err) {
     console.log(err);
   }

@@ -1,7 +1,7 @@
 const express = require("express");
-
-// const authController = require("../controllers/auth");
 const categoryController = require("../controllers/category");
+const requireAuth = require("../middleware/isAuth");
+const roles = require("../middleware/role");
 
 const {
   getCategoryValidator,
@@ -19,6 +19,8 @@ router.use("/:categoryId/subcategories", subCategoryRoute);
 router
   .route("/")
   .post(
+    requireAuth,
+    roles.allowedTo("admin", "manager"),
     categoryController.uploadCategoryImage,
     categoryController.resizeImage,
     createCategoryValidator,
@@ -30,11 +32,18 @@ router
   .route("/:id")
   .get(getCategoryValidator, categoryController.getSpeceficCategory)
   .put(
+    requireAuth,
+    roles.allowedTo("admin", "manager"),
     categoryController.uploadCategoryImage,
     categoryController.resizeImage,
     updateCategoryValidator,
     categoryController.updateCategory
   )
-  .delete(deleteCategoryValidator, categoryController.deleteCategory);
+  .delete(
+    requireAuth,
+    roles.allowedTo("admin"),
+    deleteCategoryValidator,
+    categoryController.deleteCategory
+  );
 
 module.exports = router;

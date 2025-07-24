@@ -18,6 +18,7 @@ const categoryRoutes = require("./routes/category");
 const subCategoryRoutes = require("./routes/subCategory");
 const brandsRoutes = require("./routes/brandsRoutes");
 const productRoutes = require("./routes/productRoutes");
+const usersRoutes=require('./routes/user')
 
 
 //middleware
@@ -36,6 +37,7 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/subcategories", subCategoryRoutes);
 app.use("/api/v1/brands", brandsRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/users", usersRoutes);
 
 app.use((req, res, next) => {
    next(new ApiError("this page is not exist", 404));

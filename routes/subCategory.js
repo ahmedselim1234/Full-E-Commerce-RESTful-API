@@ -1,4 +1,6 @@
 const express = require("express");
+const requireAuth = require("../middleware/isAuth");
+const roles = require("../middleware/role");
 
 const subCategoryController = require("../controllers/subCategory");
 
@@ -13,6 +15,8 @@ const router = express.Router({ mergeParams: true });
 router
   .route("/")
   .post(
+    requireAuth,
+    roles.allowedTo("admin", "manager"),
     subCategoryController.setCategoryIdBeforeValidation,
     createSubCategoryValidator,
     subCategoryController.createSubCategory
@@ -22,7 +26,16 @@ router
 router
   .route("/:id")
   .get(getSubCategoryValidator, subCategoryController.getSubCategory)
-  .put(updateSubCategoryValidator, subCategoryController.updateSubCategory)
-  .delete(subCategoryController.deleteSubCategory);
+  .put(
+    requireAuth,
+    roles.allowedTo("admin", "manager"),
+    updateSubCategoryValidator,
+    subCategoryController.updateSubCategory
+  )
+  .delete(
+    requireAuth,
+    roles.allowedTo("admin"),
+    subCategoryController.deleteSubCategory
+  );
 
 module.exports = router;
