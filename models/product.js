@@ -74,8 +74,15 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+productSchema.virtual("reviews", {
+  ref: "review",
+  foreignField: "product",
+  localField: "_id",
+});
+
 
 productSchema.pre(/^find/, function (next) {
   this.populate({
@@ -84,22 +91,21 @@ productSchema.pre(/^find/, function (next) {
   });
   next();
 });
-
-//generate url 
+//generate url
 const setImageUrl = (doc) => {
   if (doc.imageCover) {
     const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
     doc.imageCover = imageUrl;
-    console.log(doc.imageCover)
+    console.log(doc.imageCover);
   }
   if (doc.availableImages) {
-    const imagesList=[]
-    doc.availableImages.forEach((image)=>{
+    const imagesList = [];
+    doc.availableImages.forEach((image) => {
       const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-      imagesList.push(imageUrl)
-    })
-    doc.availableImages=imagesList;
-    console.log(doc.availableImages)
+      imagesList.push(imageUrl);
+    });
+    doc.availableImages = imagesList;
+    console.log(doc.availableImages);
   }
 };
 productSchema.post("init", (doc) => {

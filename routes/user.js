@@ -14,7 +14,7 @@ const {
   changeMyPassword,
 } = require("../util/userValidation");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 // --------------------------------------
 // Logged-in User Routes

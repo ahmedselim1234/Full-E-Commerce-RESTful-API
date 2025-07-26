@@ -15,6 +15,13 @@ const {
 
 const router = express.Router();
 
+//-------------------
+//nested routes
+const reviewRoute = require("./review");
+
+router.use("/:productId/reviews", reviewRoute);
+//----------------------------
+
 router
   .route("/")
   .post(

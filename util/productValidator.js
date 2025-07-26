@@ -41,6 +41,7 @@ exports.createProductValidator = [
       if (req.body.price < value || req.body.price === value) {
         throw new Error("priceAfterDiscount must be less than proce ");
       }
+      return true;
     }),
 
   check("imageCover").notEmpty().withMessage("image Cover is required"),

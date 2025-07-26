@@ -6,13 +6,13 @@ const { ApiFeatures } = require("../util/apiFeatures");
 exports.deleteFactoey = (Model) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const model = await Model.findByIdAndDelete(id);
+    const model = await Model.findById(id);
     if (!model) {
       return next(new ApiError("this document is not exist", 404));
     }
+       await model.deleteOne()
     res.status(204).json({ m: "deleted" });
   });
-
 
 exports.updateDocument = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -30,9 +30,9 @@ exports.updateDocument = (Model) =>
     if (!model) {
       return next(new ApiError("this document is not exist", 404));
     }
+    model.save();
     res.status(200).json({ data: model });
   });
-
 
 exports.createDocument = (Model) =>
   asyncHandler(async (req, res, next) => {
@@ -40,46 +40,61 @@ exports.createDocument = (Model) =>
       req.body.slug = slugify(req.body.title);
     } else if (req.body.name) {
       req.body.slug = slugify(req.body.name);
-      console.log(req.body.name)
+      console.log(req.body.name);
     }
-    const newModel = await Model.create(req.body); 
+    const newModel = await Model.create(req.body);
 
     res.status(201).json({ newModel });
   });
 
-
-exports.getSpeceficDocument = (Model) =>
+exports.getSpeceficDocument = (Model, populateOptions) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
+    let query;
 
-    const model = await Model.findById(id);
-    if (!model) {
-      return next(new ApiError("this gocument is not exist", 404));
+    if (req.params.productId) {
+      const prodId = req.params.productId;
+
+      query = Model.findOne({ _id: id, product: prodId });
+    } else {
+      query = Model.findOne({ _id: id });
     }
+
+    if (populateOptions) {
+      query.populate(populateOptions);
+    }
+
+    const model = await query;
+
+    if (!model) {
+      return next(new ApiError("This document does not exist", 404));
+    }
+
     res.status(200).json({ data: model });
   });
 
-exports.getALLDocument = (Model,ModelName) => asyncHandler(async (req, res, next) => {
-  const CountOfDocuments = await Model.countDocuments();
+exports.getALLDocument = (Model, ModelName) =>
+  asyncHandler(async (req, res, next) => {
+    let filter = {};
+    if (req.filterObject) {
+      filter = req.filterObject;
+    }
+    const CountOfDocuments = await Model.countDocuments();
 
-  const apiFeatures = new ApiFeatures(Model.find(), req.query)
-    .filter()
-    .search(ModelName)
-    .sort()
-    .limitFields()
-    .paginate(CountOfDocuments);
+    const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
+      .filter()
+      .search(ModelName)
+      .sort()
+      .limitFields()
+      .paginate(CountOfDocuments);
 
-  const { mongoQuery, paginatetionResult } = apiFeatures;
+    const { mongoQuery, paginatetionResult } = apiFeatures;
 
-  const Documents  = await mongoQuery;
+    const Documents = await mongoQuery;
 
-  res
-    .status(200)
-    .json({
-      result: Documents .length,
+    res.status(200).json({
+      result: Documents.length,
       paginatetionResult: paginatetionResult,
-      data: Documents ,
+      data: Documents,
     });
-});
-
-
+  });

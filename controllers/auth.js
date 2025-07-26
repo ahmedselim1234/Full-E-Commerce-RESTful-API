@@ -35,7 +35,7 @@ exports.signup = async (req, res, next) => {
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
-    return res.json({ accessToken, email, password });
+    return res.json({ accessToken, email, password ,createUser});
   } catch (err) {
     console.log(err);
   }
@@ -61,7 +61,7 @@ exports.login = async (req, res, next) => {
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
-    return res.json({ accessToken, email, password });
+    return res.json({ accessToken, email, password ,user});
   } catch (err) {
     console.log(err);
   }

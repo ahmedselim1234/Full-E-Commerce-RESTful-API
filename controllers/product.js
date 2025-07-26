@@ -2,9 +2,7 @@
 const { v4: uuidv4 } = require("uuid");
 // eslint-disable-next-line import/no-extraneous-dependencies
 const sharp = require("sharp");
-// const multer = require("multer");
 const asyncHandler = require("express-async-handler");
-// const { ApiError } = require("../middleware/errorHandler");
 const Product = require("../models/product");
 const factoryHandlers = require("./handlersFactory");
 const { uploadOImages } = require("../middleware/uploadImage");
@@ -48,7 +46,7 @@ exports.createProdact = factoryHandlers.createDocument(Product);
 
 exports.getProducts = factoryHandlers.getALLDocument(Product, "Products");
 
-exports.getSpeceficproduct = factoryHandlers.getSpeceficDocument(Product);
+exports.getSpeceficproduct = factoryHandlers.getSpeceficDocument(Product,"reviews");
 
 exports.updateproduct = factoryHandlers.updateDocument(Product);
 
