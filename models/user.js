@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "client","manager"],
+      enum: ["admin", "client", "manager"],
       default: "client",
     },
     phone: String,
@@ -34,35 +34,45 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
     dateOfChangePassword: {
-  type: Date
-},
-
+      type: Date,
+    },
+    wishList:[ {
+     type:mongoose.Schema.ObjectId,
+      ref:'product'
+    }],
+    addresses:[{
+      id:{type:mongoose.Schema.Types.ObjectId},
+      alias:String,
+      details:String,
+      phone:String,
+      city:String
+    }]
+    ,
     passwordResetCode: String,
     expireResetCode: Date,
     verifyResetCode: Boolean,
   },
   { timestamps: true }
 );
-const setImageUrl=(doc)=>{
-       if(doc.profileImage){
-        const imageUrl=`${process.env.BASE_URL}/user/${doc.profileImage}`;
-        doc.profileImage=imageUrl;
-    }
-}
-userSchema.post("init", (doc) =>{
-   setImageUrl(doc)
+const setImageUrl = (doc) => {
+  if (doc.profileImage) {
+    const imageUrl = `${process.env.BASE_URL}/user/${doc.profileImage}`;
+    doc.profileImage = imageUrl;
+  }
+};
+userSchema.post("init", (doc) => {
+  setImageUrl(doc);
 });
-userSchema.post("save", (doc) =>{
-    setImageUrl(doc)
+userSchema.post("save", (doc) => {
+  setImageUrl(doc);
 });
 
 //hash password before save
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
-
 
 module.exports = mongoose.model("User", userSchema);

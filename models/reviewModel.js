@@ -25,8 +25,6 @@ const reviewschema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-
 reviewschema.statics.calcAverageRatingsAndQuantity = async function (
   productId
 ) {
