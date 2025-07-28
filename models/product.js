@@ -91,6 +91,7 @@ productSchema.pre(/^find/, function (next) {
   });
   next();
 });
+
 //generate url
 const setImageUrl = (doc) => {
   if (doc.imageCover) {

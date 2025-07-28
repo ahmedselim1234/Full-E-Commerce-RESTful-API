@@ -59,12 +59,13 @@ exports.getSpeceficDocument = (Model, populateOptions) =>
     } else {
       query = Model.findOne({ _id: id });
     }
-
+    
     if (populateOptions) {
       query.populate(populateOptions);
     }
-
+    
     const model = await query;
+    // console.log(model)
 
     if (!model) {
       return next(new ApiError("This document does not exist", 404));
