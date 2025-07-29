@@ -126,8 +126,30 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
     cancel_url: `${req.protocol}://${req.get("host")}/cart`,
     customer_email: req.user.email,
     client_reference_id: String(cart._id),
-    metadata: req.body.shippingAddress, 
+    metadata: req.body.shippingAddress,
   });
 
   res.status(200).json({ session });
+});
+
+exports.webhookCheckout = asyncHandler(async (req, res, next) => {
+  let event = request.body;
+
+  if (process.env.STRIPE_WEBHOOK_SECRET) {
+
+    const signature = request.headers["stripe-signature"];
+    try {
+      event = stripe.webhooks.constructEvent(
+        request.body,
+        signature,
+        endpointSecret
+      );
+    } catch (err) {
+      console.log(` Webhook signature verification failed.`, err.message);
+      return response.sendStatus(400);
+    }
+  }
+  if(event.type==='checkout.session.completed'){
+    console.log('create order here')
+  }
 });

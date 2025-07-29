@@ -12,6 +12,7 @@ router.get("/getMyOrders", requireAuth, roles.allowedTo("client"), orderControll
 
 router.get("/check-out-session/:cartId", requireAuth, roles.allowedTo("client"), orderController.checkOutSession);
 
+
 // Routes accessible by "admin" or "manager"
 router.use(requireAuth, roles.allowedTo("admin", "manager")); 
 

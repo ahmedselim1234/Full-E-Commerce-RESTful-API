@@ -1,7 +1,7 @@
 require("dotenv").config();
 const cors = require("cors");
 // eslint-disable-next-line import/no-extraneous-dependencies
-const compression = require('compression')
+const compression = require("compression");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
@@ -9,13 +9,17 @@ const morgan = require("morgan");
 const connectDB = require("./config/dbnonnect");
 // const corsOptions = require("./config/corsOptions");
 const { ApiError, HandleError } = require("./middleware/errorHandler");
+const {webhookCheckout} = require("./controllers/order");
 
 const app = express();
 
 app.use(cors());
 //compress all requests
-app.use(compression()); 
+app.use(compression());
 
+//checkout webhook
+
+app.post("/checkout-webhook", express.raw({type: 'application/json'}),webhookCheckout)
 
 const port = process.env.PORT || 3000;
 //-------------
@@ -50,9 +54,9 @@ process.on("unhandledRejection", (err) => {
   console.log("unhandledRejection", err.message);
   process.exit(1);
 });
-
+ 
 connectDB().then(() => {
- app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port}`);
-});
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on port ${port}`);
+  });
 });
