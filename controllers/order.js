@@ -8,6 +8,7 @@ const Product = require("../models/product");
 const Order = require("../models/orderModel");
 const User = require("../models/user");
 const factoryHandlers = require("./handlersFactory");
+const user = require("../models/user");
 
 exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const taxPrice = 0;
@@ -136,9 +137,10 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
 const createOrder=async (session)=>{
   const cartId=session.client_reference_id;
   const shippingAddress=session.metadata;
+  const orderPrice=session.amount_total/100;
+
   const email=session.customer_details.email;
-  const orderPrice=session.amount_total;
-  const user=await User.findOne({email:email})
+  const user=await User.findOne(req.user.id)
   const cart=await Cart.findById(cartId)
 
    const order = await Order.create({
