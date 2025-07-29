@@ -9,7 +9,7 @@ const morgan = require("morgan");
 const connectDB = require("./config/dbnonnect");
 // const corsOptions = require("./config/corsOptions");
 const { ApiError, HandleError } = require("./middleware/errorHandler");
-const {webhookCheckout} = require("./controllers/order");
+const { webhookCheckout } = require("./controllers/order");
 
 const app = express();
 
@@ -18,8 +18,11 @@ app.use(cors());
 app.use(compression());
 
 //checkout webhook
-
-app.post("/checkout-webhook", express.raw({type: 'application/json'}),webhookCheckout)
+app.post(
+  "/checkout-webhook",
+  express.raw({ type: "application/json" }),
+  webhookCheckout
+);
 
 const port = process.env.PORT || 3000;
 //-------------
@@ -54,7 +57,7 @@ process.on("unhandledRejection", (err) => {
   console.log("unhandledRejection", err.message);
   process.exit(1);
 });
- 
+
 connectDB().then(() => {
   app.listen(port, "0.0.0.0", () => {
     console.log(`Server running on port ${port}`);

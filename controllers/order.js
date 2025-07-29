@@ -6,6 +6,7 @@ const Cart = require("../models/cart");
 const Product = require("../models/product");
 // const Coupon = require("../models/couponModel");
 const Order = require("../models/orderModel");
+const User = require("../models/user");
 const factoryHandlers = require("./handlersFactory");
 
 exports.createCashOrder = asyncHandler(async (req, res, next) => {
@@ -132,24 +133,62 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
   res.status(200).json({ session });
 });
 
+const createOrder=async (session)=>{
+  const cartId=session.client_reference_id;
+  const shippingAddress=session.metadata;
+  const email=session.customer_details.email;
+  const orderPrice=session.amount_total;
+  const user=await User.findOne({email:email})
+  const cart=await Cart.findById(cartId)
+
+   const order = await Order.create({
+    user: user._id,
+    cartItems: cart.cartItems,
+    totalOrderPrice:orderPrice,
+    shippingAddress,
+    paidAt:Date.now(),
+    paymentMethodType:'cart',
+    isPaid:true
+  });
+
+    if (order) {
+    const bulkOption = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+
+    await Product.bulkWrite(bulkOption, {});
+    //clear cart depend on cartId
+    await Cart.findByIdAndDelete(cartId);
+  }
+}
+
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
-  let event = request.body;
+  let event = req.body;
 
-  if (process.env.STRIPE_WEBHOOK_SECRET) {
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    const signature = request.headers["stripe-signature"];
+  if (endpointSecret) {
+    const signature = req.headers["stripe-signature"];
     try {
       event = stripe.webhooks.constructEvent(
-        request.body,
+        req.body,
         signature,
         endpointSecret
       );
     } catch (err) {
-      console.log(` Webhook signature verification failed.`, err.message);
-      return response.sendStatus(400);
+      console.log(`Webhook signature verification failed: ${err.message}`);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
   }
-  if(event.type==='checkout.session.completed'){
-    console.log('create order here')
+
+
+  if (event.type === "checkout.session.completed") {
+    // const session = event.data.object;
+    createOrder(event.data.object)
   }
+
+  res.status(200).json({ received: true });
 });
