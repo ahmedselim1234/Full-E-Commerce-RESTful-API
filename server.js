@@ -1,14 +1,22 @@
 require("dotenv").config();
 const cors = require("cors");
+// eslint-disable-next-line import/no-extraneous-dependencies
+const compression = require('compression')
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const morgan = require("morgan");
 const connectDB = require("./config/dbnonnect");
-const corsOptions = require("./config/corsOptions");
+// const corsOptions = require("./config/corsOptions");
 const { ApiError, HandleError } = require("./middleware/errorHandler");
 
 const app = express();
+
+app.use(cors());
+//compress all requests
+app.use(compression()); 
+
+
 const port = process.env.PORT || 3000;
 //-------------
 
@@ -19,7 +27,7 @@ const mountRoures = require("./routes/index");
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-app.use(cors(corsOptions));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

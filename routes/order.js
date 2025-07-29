@@ -7,7 +7,10 @@ const router = express.Router();
 
 // Routes accessible by "client"
 router.post("/:cartId", requireAuth, roles.allowedTo("client"), orderController.createCashOrder);
+
 router.get("/getMyOrders", requireAuth, roles.allowedTo("client"), orderController.getOrderForLoggedUser);
+
+router.get("/check-out-session/:cartId", requireAuth, roles.allowedTo("client"), orderController.checkOutSession);
 
 // Routes accessible by "admin" or "manager"
 router.use(requireAuth, roles.allowedTo("admin", "manager")); 
