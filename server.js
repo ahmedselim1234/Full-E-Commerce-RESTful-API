@@ -52,7 +52,7 @@ process.on("unhandledRejection", (err) => {
 });
 
 connectDB().then(() => {
-  app.listen(port, () => {
-    console.log("server is running");
-  });
+ app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
+});
 });
