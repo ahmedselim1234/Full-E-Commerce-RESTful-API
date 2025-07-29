@@ -8,7 +8,6 @@ const Product = require("../models/product");
 const Order = require("../models/orderModel");
 const User = require("../models/user");
 const factoryHandlers = require("./handlersFactory");
-const user = require("../models/user");
 
 exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const taxPrice = 0;
@@ -134,42 +133,59 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
   res.status(200).json({ session });
 });
 
-const createOrder=async (session)=>{
-  const cartId=session.client_reference_id;
-  const shippingAddress=session.metadata;
-  const orderPrice=session.amount_total/100;
+const createOrder = async (session) => {
+  try {
+    const cartId = session.client_reference_id;
+    const shippingAddress = {
+      city: session.metadata.city,
+      details: session.metadata.details,
+      phone: session.metadata.phone,
+      postalCode: session.metadata.postalCode,
+    };
+    const orderPrice = session.amount_total / 100;
 
-  const email=session.customer_details.email;
-  const user=await User.findOne(req.user.id)
-  const cart=await Cart.findById(cartId)
+    const email = session.customer_details.email;
+    console.log("Client email:", email);
 
-   const order = await Order.create({
-    user: user._id,
-    cartItems: cart.cartItems,
-    totalOrderPrice:orderPrice,
-    shippingAddress,
-    paidAt:Date.now(),
-    paymentMethodType:'cart',
-    isPaid:true
-  });
+    const user = await User.findOne({ email });
+    if (!user) throw new Error('User not found');
+
+    const cart = await Cart.findById(cartId);
+    if (!cart) throw new Error('Cart not found');
+
+    const order = await Order.create({
+      user: user._id,
+      cartItems: cart.cartItems,
+      totalOrderPrice: orderPrice,
+      shippingAddress,
+      paidAt: Date.now(),
+      paymentMethodType: 'card',
+      isPaid: true,
+    });
 
     if (order) {
-    const bulkOption = cart.cartItems.map((item) => ({
-      updateOne: {
-        filter: { _id: item.product },
-        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
-      },
-    }));
+      const bulkOption = cart.cartItems.map((item) => ({
+        updateOne: {
+          filter: { _id: item.product },
+          update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+        },
+      }));
 
-    await Product.bulkWrite(bulkOption, {});
-    //clear cart depend on cartId
-    await Cart.findByIdAndDelete(cartId);
+      await Product.bulkWrite(bulkOption);
+      await Cart.findByIdAndDelete(cartId);
+    }
+
+    return order;
+
+  } catch (err) {
+    console.error("Order creation error:", err.message);
+    throw err;
   }
-}
+};
+
 
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
   let event = req.body;
-
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (endpointSecret) {
@@ -186,10 +202,8 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
     }
   }
 
-
   if (event.type === "checkout.session.completed") {
-    // const session = event.data.object;
-    createOrder(event.data.object)
+    await createOrder(event.data.object); 
   }
 
   res.status(200).json({ received: true });
