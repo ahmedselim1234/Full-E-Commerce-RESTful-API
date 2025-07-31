@@ -123,8 +123,8 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
       },
     ],
     mode: "payment",
-    success_url: `${req.protocol}://${req.get("host")}/orders`,
-    cancel_url: `${req.protocol}://${req.get("host")}/cart`,
+    success_url: `${req.protocol}://${req.get("host")}/api/v1/order`,
+    cancel_url: `${req.protocol}://${req.get("host")}/api/v1/cart`,
     customer_email: req.user.email,
     client_reference_id: String(cart._id),
     metadata: req.body.shippingAddress,
@@ -136,22 +136,25 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
 const createOrder = async (session) => {
   try {
     const cartId = session.client_reference_id;
+
     const shippingAddress = {
-      city: session.metadata.city,
-      details: session.metadata.details,
-      phone: session.metadata.phone,
-      postalCode: session.metadata.postalCode,
+      city: session.metadata?.city,
+      details: session.metadata?.details,
+      phone: session.metadata?.phone,
+      postalCode: session.metadata?.postalCode,
     };
+
     const orderPrice = session.amount_total / 100;
 
-    const email = session.customer_details.email;
-    console.log("Client email:", email);
+    const email = session.customer_details?.email;
+
+    if (!email) throw new Error("Missing customer email");
 
     const user = await User.findOne({ email });
-    if (!user) throw new Error('User not found');
+    if (!user) throw new Error("User not found");
 
     const cart = await Cart.findById(cartId);
-    if (!cart) throw new Error('Cart not found');
+    if (!cart) throw new Error("Cart not found");
 
     const order = await Order.create({
       user: user._id,
@@ -159,7 +162,7 @@ const createOrder = async (session) => {
       totalOrderPrice: orderPrice,
       shippingAddress,
       paidAt: Date.now(),
-      paymentMethodType: 'card',
+      paymentMethodType: "card",
       isPaid: true,
     });
 
@@ -172,24 +175,25 @@ const createOrder = async (session) => {
       }));
 
       await Product.bulkWrite(bulkOption);
+
       await Cart.findByIdAndDelete(cartId);
     }
 
     return order;
-
   } catch (err) {
     console.error("Order creation error:", err.message);
     throw err;
   }
 };
 
-
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
-  let event = req.body;
+  let event;
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
 
   if (endpointSecret) {
     const signature = req.headers["stripe-signature"];
+
     try {
       event = stripe.webhooks.constructEvent(
         req.body,
@@ -197,13 +201,21 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
         endpointSecret
       );
     } catch (err) {
-      console.log(`Webhook signature verification failed: ${err.message}`);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+  } else {
+    event = req.body;
   }
 
+
   if (event.type === "checkout.session.completed") {
-    await createOrder(event.data.object); 
+    try {
+      console.log("Processing checkout.session.completed");
+      await createOrder(event.data.object);
+      console.log("Order creation finished");
+    } catch (err) {
+      console.error("Error creating order from webhook:", err.message);
+    }
   }
 
   res.status(200).json({ received: true });
