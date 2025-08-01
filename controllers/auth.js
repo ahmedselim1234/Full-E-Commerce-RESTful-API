@@ -24,6 +24,7 @@ exports.signup = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: email });
     if (user) return res.json({ m: "this email is already exist" });
+
     const createUser = await User.create(req.body);
 
     const accessToken = generateToken.accessToken(createUser);
@@ -48,8 +49,9 @@ exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: email });
     if (!user) return res.json({ m: "this email is not  exist" });
-
+    console.log(password)
     const comparePassword = await bcrypt.compare(password, user.password);
+    console.log(comparePassword)
     if (!comparePassword) return res.json({ m: "enter a valid password " });
 
     const accessToken = generateToken.accessToken(user);
@@ -162,8 +164,8 @@ exports.addNewPassword = async (req, res, next) => {
     if (user.verifyResetCode === false)
       return res.status(400).json({ m: "enter the reset code " });
     if (!user) return res.json({ m: "enter valid email" });
-    const hashedPass = await bcrypt.hash(password, 10);
-    user.password = hashedPass;
+
+    user.password = password;
     user.passwordResetCode = undefined;
     user.expireResetCode = undefined;
     user.verifyResetCode = undefined;

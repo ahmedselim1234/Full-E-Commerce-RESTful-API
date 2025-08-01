@@ -12,7 +12,7 @@ const sendEmail =async (options) => {
     },
   });
   const mailOpts={
-    from:`"File-Sharing-App" <${process.env.EMAIL_USER}>`,
+    from:`"E-shop-App" <${process.env.EMAIL_USER}>`,
     to:options.email,//dynamic
     subject:options.subject,
     text:options.message,

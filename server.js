@@ -10,6 +10,10 @@ const connectDB = require("./config/dbnonnect");
 // const corsOptions = require("./config/corsOptions");
 const { ApiError, HandleError } = require("./middleware/errorHandler");
 const { webhookCheckout } = require("./controllers/order");
+const rateLimit = require("express-rate-limit");
+const hpp = require('hpp');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require("xss");
 
 const app = express();
 
@@ -36,9 +40,27 @@ if (process.env.NODE_ENV === "development") {
 }
 
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "uploads")));
+
+// app.use(mongoSanitize()); 
+// app.use(xss()); 
+//Express middleware to protect against HTTP Parameter Pollution attacks
+app.use(hpp({whitelist:['price']})); 
+
+//rate limit
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message:'to many requests from this ip'
+});
+
+// Apply the rate limiting middleware to all requests.
+app.use('/api',limiter);
 
 // routs
 mountRoures(app);

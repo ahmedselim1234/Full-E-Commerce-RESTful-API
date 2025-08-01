@@ -49,10 +49,11 @@ class ApiFeatures {
   }
 
   sort() {
-    if (this.query.sort) {
+    if (typeof  this.query.sort=== 'string') {
       const sortBy = this.query.sort.split(",").join(" ");
       this.mongoQuery = this.mongoQuery.sort(sortBy);
     } else {
+      // console.log(this.query.sort)
       this.mongoQuery = this.mongoQuery.sort("-createdAt");
     }
     return this;

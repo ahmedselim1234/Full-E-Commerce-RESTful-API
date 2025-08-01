@@ -41,6 +41,7 @@ exports.createDocument = (Model) =>
     } else if (req.body.name) {
       req.body.slug = slugify(req.body.name);
       console.log(req.body.name);
+      console.log(req.body)  
     }
     const newModel = await Model.create(req.body);
 

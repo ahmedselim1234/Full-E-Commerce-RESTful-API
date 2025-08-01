@@ -34,7 +34,7 @@ exports.createUserValidator = [
   check("password")
     .notEmpty()
     .withMessage("password required!")
-    .isLength({ min: 8 })
+    .isLength({ min: 6 })
     .withMessage("too short")
     .isLength({ max: 32 })
     .custom((val, { req }) => {
