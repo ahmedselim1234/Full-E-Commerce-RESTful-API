@@ -11,21 +11,38 @@ const connectDB = require("./config/dbnonnect");
 const { ApiError, HandleError } = require("./middleware/errorHandler");
 const { webhookCheckout } = require("./controllers/order");
 const rateLimit = require("express-rate-limit");
-const hpp = require('hpp');
-const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require("hpp");
+const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss");
+
+//stripe listen --forward-to localhost:3000/checkout-webhook
 
 const app = express();
 
-app.use(cors());
+// app.use(cors());
+// مثال Express.js
+import cors from "cors";
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://react-e-commerce-ivory.vercel.app"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+
 //compress all requests
 app.use(compression());
 
 //checkout webhook
+
 app.post(
   "/checkout-webhook",
   express.raw({ type: "application/json" }),
-  webhookCheckout
+  webhookCheckout,
 );
 
 const port = process.env.PORT || 3000;
@@ -44,10 +61,10 @@ app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "uploads")));
 
-// app.use(mongoSanitize()); 
-// app.use(xss()); 
+// app.use(mongoSanitize());
+// app.use(xss());
 //Express middleware to protect against HTTP Parameter Pollution attacks
-app.use(hpp({whitelist:['price']})); 
+app.use(hpp({ whitelist: ["price"] }));
 
 //rate limit
 const limiter = rateLimit({
@@ -56,11 +73,11 @@ const limiter = rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false,
   ipv6Subnet: 56,
-  message:'to many requests from this ip'
+  message: "to many requests from this ip",
 });
 
 // Apply the rate limiting middleware to all requests.
-app.use('/api',limiter);
+app.use("/api", limiter);
 
 // routs
 mountRoures(app);

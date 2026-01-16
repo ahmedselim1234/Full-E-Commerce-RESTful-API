@@ -5,7 +5,7 @@ const brandSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "name is required!"],
-      unique: [true, "this category is already exist"],
+      unique: [true, "this brand is already exist"],
       minlength: [3, "name to short"],
       maxlength: [32, "too long "],
       trim: true,

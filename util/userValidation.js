@@ -37,12 +37,13 @@ exports.createUserValidator = [
     .isLength({ min: 6 })
     .withMessage("too short")
     .isLength({ max: 32 })
-    .custom((val, { req }) => {
-      if (val !== req.body.passwordConfirmation) {
-        throw new Error("password Confirmation is not correct");
-      }
-      return true;
-    }),
+    // .custom((val, { req }) => {
+    //   if (val !== req.body.passwordConfirmation) {
+    //     throw new Error("password Confirmation is not correct");
+    //   }
+    //   return true;
+    // })
+    ,
 
   // check("passwordConfirmation")
   //   .notEmpty()

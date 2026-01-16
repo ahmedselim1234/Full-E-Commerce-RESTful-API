@@ -4,8 +4,7 @@ const jwt = require("jsonwebtoken");
 const slugify = require("slugify");
 // eslint-disable-next-line import/no-extraneous-dependencies, no-unused-vars
 const { v4: uuidv4 } = require("uuid");
-// eslint-disable-next-line import/no-extraneous-dependencies, no-unused-vars
-const sharp = require("sharp");
+
 // const asyncHandler = require("express-async-handler");
 const sendEmail = require("../util/sendEmail");
 const User = require("../models/user"); 
@@ -142,10 +141,12 @@ exports.verifyResetCode = async (req, res, next) => {
       .createHash("sha256")
       .update(enteredCode)
       .digest("hex");
+
     const user = await User.findOne({
       passwordResetCode: hashedCode,
       expireResetCode: { $gt: Date.now() },
     });
+    
     if (!user) return res.json({ m: "code invalid or expired" });
     user.verifyResetCode = true;
     console.log(user);

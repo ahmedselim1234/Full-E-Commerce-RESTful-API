@@ -4,7 +4,11 @@ const authController = require("../controllers/auth");
 
 const router = express.Router();
 
-router.post('/signup',authController.signup);
+const {
+  createUserValidator,
+} = require("../util/userValidation");
+
+router.post('/signup',  createUserValidator,authController.signup);
 router.post('/login',authController.login);
 router.get('/refresh',authController.refresh);
 router.post('/logout',authController.logout);

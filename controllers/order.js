@@ -79,6 +79,8 @@ exports.updateOrderToPay = asyncHandler(async (req, res, next) => {
   res.status(200).json(order);
 });
 
+
+
 exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.orderId);
   if (!order) {
@@ -91,6 +93,8 @@ exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
   await order.save();
   res.status(200).json(order);
 });
+
+
 
 //get checkout session from stripe and send it as response
 exports.checkOutSession = asyncHandler(async (req, res, next) => {
@@ -132,6 +136,8 @@ exports.checkOutSession = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ session });
 });
+
+
 
 const createOrder = async (session) => {
   try {
@@ -187,6 +193,7 @@ const createOrder = async (session) => {
 };
 
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
+  console.log('webHook')
   let event;
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

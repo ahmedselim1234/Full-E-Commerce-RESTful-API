@@ -2,7 +2,7 @@ const express = require("express");
 const cartController = require("../controllers/Cart");
 const requireAuth = require("../middleware/isAuth");
 const roles = require("../middleware/role");
-// const cart = require("../models/cart");
+
 
 // const {
 //   getCategoryValidator,
