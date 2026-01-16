@@ -19,9 +19,7 @@ const xss = require("xss");
 
 const app = express();
 
-// app.use(cors());
-// مثال Express.js
-import cors from "cors";
+ 
 
 const allowedOrigins = [
   "http://localhost:5173",

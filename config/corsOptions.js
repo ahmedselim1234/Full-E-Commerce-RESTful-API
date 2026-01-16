@@ -12,5 +12,5 @@ const corsOPtions={
     credentials:true,// to send cookies with the request
     optionsSuccessStatus: 200
 }
-
+  
 module.exports=corsOPtions;
