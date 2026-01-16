@@ -26,7 +26,7 @@ import cors from "cors";
 const allowedOrigins = [
   "http://localhost:5173",
   "https://react-e-commerce-ivory.vercel.app"
-];
+]; 
 
 app.use(cors({
   origin: allowedOrigins,
